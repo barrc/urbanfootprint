@@ -22,6 +22,14 @@ __author__ = 'calthorpe_analytics'
 class SwmmFeature(Feature):
 
     total_swmm_runoff = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    # attribute to match the attributes in the .rpt except for total runon in since we are not using it in this  implementation of the swmm model
+    total_precip_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    total_evap_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    total_infil_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    total_runoff_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    total_runoff_gal = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    peak_runoff_cfs = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+    runoff_coeff = models.DecimalField(max_digits=15, decimal_places=4, default=0)
 
     class Meta(object):
         abstract = True
