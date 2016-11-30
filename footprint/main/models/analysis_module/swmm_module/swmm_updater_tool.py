@@ -46,7 +46,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
     @property
     def output_fields(self):
-        return ['id', 'total_swmm_runoff']
+        return ['id', 'total_swmm_runoff', 'total_precip_in', 'total_evap_in', 'total_infil_in', 'total_runoff_in', 'total_runoff_gal', 'peak_runoff_cfs', 'runoff_coeff']
 
     class Meta(object):
         app_label = 'main'
@@ -113,8 +113,8 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             # self.printOut(feature.id)
             idList.append(str(feature.id))
 
-        self.printOut('idList')
-        self.printOut(idList)
+        # self.printOut('idList')
+        # self.printOut(idList)
         joinedIdList = ",".join(idList)
         self.printOut('joinedIdList')
         self.printOut(joinedIdList)
@@ -445,6 +445,10 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         # self.printOut("cwd")
         # self.printOut(os.getcwd())
 
+        self.printOut("output_list")
+        self.printOut(output_list)
+
+
         # SUBMIT GEOJSON
         simulationID = False
         try:
@@ -497,11 +501,12 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             
             
         # GET STATUS
-        wait_seconds = 240 # 4 min
+        wait_seconds = 240
         n = 5
         while ( wait_seconds > 0 ):
+            self.printOut('will wait a maximum of ' + str(wait_seconds) + ' more seconds')
             self.printOut('waiting ' + str(n) + ' sec')
-            time.sleep(n) # delays for 10 seconds
+            time.sleep(n) # delays for n seconds
             wait_seconds -= n
             try:
                 url = 'http://chis-dev.respec.com/rest/status/' + simulationID
@@ -545,12 +550,17 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             self.printOut("error " + str(e))
 
 
+        self.printOut('waiting for the simulation to finish running')
+
+        swmm_result_dict = {}
         # GET STATUS
-        wait_seconds = 240 # 4 min
+        wait_seconds = 800
         n = 5
+        # currently taking about 210 seconds
         while ( wait_seconds > 0 ):
+            self.printOut('will wait a maximum of ' + str(wait_seconds) + ' more seconds')
             self.printOut('waiting ' + str(n) + ' sec')
-            time.sleep(n) # delays for 10 seconds
+            time.sleep(n) # delays for n seconds
             wait_seconds -= n
             try:
                 url = 'http://chis-dev.respec.com/rest/status/' + simulationID
@@ -561,8 +571,73 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
                     resList = responseObj['result_list']
                     simObject = resList[0]
                     simObjectLoaded = json.loads(simObject)
-                    if(simObjectLoaded['status'] == "completed"):
+                    if(simObjectLoaded['status'] == "complete"):
                         wait_seconds = 0
+                        try:
+                            res_dict = simObjectLoaded['file_report_results_dict']
+                            res_dict_obj = json.loads(res_dict)
+                            # the simObject should include the parsed rpt attributes
+                            self.printOut('sim object file_report_results_dict res_dict_obj')
+                            # self.printOut(res_dict_obj)
+                        except Exception as e:
+                            self.printOut("error " + str(e))
+                        
+                        try:
+                            self.printOut('res_dict_obj Subcatchment Summary Array')
+                            arr_string = res_dict_obj["Subcatchment Summary Array"]
+                            self.printOut(type(arr_string)) # unicode
+                            # self.printOut(res_dict_obj["Subcatchment Summary Array"])
+                        except Exception as e:
+                            self.printOut("error " + str(e))
+                        
+                        try:
+                            arr_string_loaded = json.loads(arr_string)
+                            # self.printOut('arr_string_loaded')
+                            # self.printOut(type(arr_string_loaded)) # list
+                            numResults = len(arr_string_loaded)
+                            for x in xrange(0,numResults):
+                                # self.printOut(arr_string_loaded[x])
+                                self.printOut(type(arr_string_loaded[x])) # dict
+                                self.printOut(arr_string_loaded[x]['Subcatchment'])
+                                # add result to the swmm_result_dict
+
+                                # try:
+                                #     swmm_result_dict[arr_string_loaded[x]['Subcatchment']]
+                                # except Exception as e:
+                                #     # should throw a key error each time otherwise we're overwriting data
+
+                                swmm_result_dict[arr_string_loaded[x]['Subcatchment']] = arr_string_loaded[x]
+
+                                # subcatchment = parcelID
+
+                                # names from output_parser.py
+                                # 'Subcatchment',
+                                # 'Total Precip in',
+                                # 'Total Runon in',
+                                # 'Total Evap in',
+                                # 'Total Infil in',
+                                # 'Total Runoff in',
+                                # 'Total Runoff 10^6 gal',
+                                # 'Peak Runoff CFS',
+                                # 'Runoff Coeff'
+
+                                # total_precip_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+                                # total_evap_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+                                # total_infil_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+                                # total_runoff_in = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+                                # total_runoff_gal = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+                                # peak_runoff_cfs = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+                                # runoff_coeff = models.DecimalField(max_digits=15, decimal_places=4, default=0)
+
+
+                        except Exception as e:
+                            self.printOut("error " + str(e))
+
+                        # try:
+                        #     self.printOut('sim object file_report_results_dict Subcatchment Summary Array')
+                        #     self.printOut(res_dict["Subcatchment Summary Array"])
+                        # except Exception as e:
+                        #     self.printOut("error " + str(e))
                         
                 except Exception as e:
                     self.printOut('unable to complete status call')
@@ -571,7 +646,78 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             except Exception as e:
                 self.printOut("error " + str(e))
 
-        # GET RPT
+
+
+
+        self.printOut('done waiting for the simulation to finish running')
+
+        self.printOut('swmm_result_dict')
+        self.printOut(swmm_result_dict)
+
+        # TODO iterate through the output list and then based on the parcelID access the proper item in the swmm_results_dict to get the run off attributes
+        num_swmm_records = len(output_list)
+        self.printOut('output_list length')
+        self.printOut(num_swmm_records)
+        for x in xrange(0,num_swmm_records):
+            out_item = output_list[x]
+            self.printOut('out_item')
+            self.printOut(type(out_item))
+            # self.printOut(out_item)
+            self.printOut(out_item) # [314829, 32895.1367781155, None, None, None, None, None, None, None]
+            out_item_parcel_id = out_item[0]
+            self.printOut(out_item_parcel_id)
+            self.printOut(type(out_item_parcel_id))
+            out_item_parcel_id = str(out_item_parcel_id)
+            self.printOut(type(out_item_parcel_id))
+            swmm_result_item = swmm_result_dict[out_item_parcel_id]
+            self.printOut('matching swmm_result_dict item')
+            self.printOut(type(swmm_result_item))
+            self.printOut(swmm_result_item)
+            # {u'Total Runoff 10^6 gal': 0.63, u'Subcatchment': u'314829', u'Total Precip in': 178.24, u'Total Runon in': 0.0, u'Total Infil in': 77.79, u'Peak Runoff CFS': 0.4, u'Runoff Coeff': 0.516, u'Total Evap in': 8.72, u'Total Runoff in': 91.92}
+            try:
+                top = swmm_result_item['Total Precip in']
+                self.printOut('Total Precip in')
+                self.printOut(top)
+            except Exception as e:
+                self.printOut(str(e))
+
+            try:
+                top = swmm_result_item[u'Total Runoff 10^6 gal']
+                self.printOut(u'Total Runoff 10^6 gal')
+                self.printOut(top)
+            except Exception as e:
+                self.printOut(str(e))
+
+            try:
+                oil = swmm_result_item['Total Precip in']
+                self.printOut('oil')
+                self.printOut(oil)
+
+                out_item[2] = swmm_result_item['Total Precip in']
+                out_item[3] = swmm_result_item['Total Evap in']
+                out_item[4] = swmm_result_item['Total Infil in']
+                out_item[5] = swmm_result_item['Total Runoff in']
+                out_item[6] = swmm_result_item['Total Runoff 10^6 gal']
+                out_item[5] = swmm_result_item['Peak Runoff CFS']
+                out_item[6] = swmm_result_item['Runoff Coeff']
+            except Exception as e:
+                self.printOut(str(e))
+            
+
+                
+
+            # out_item.total_precip_in = swmm_result_item['Total Precip in']
+            # out_item.total_evap_in = swmm_result_item['Total Evap in']
+            # out_item.total_infil_in = swmm_result_item['Total Infil in']
+            # out_item.total_runoff_in = swmm_result_item['Total Runoff in']
+            # out_item.total_runoff_gal = swmm_result_item['Total Runoff 10^6 gal']
+            # out_item.peak_runoff_cfs = swmm_result_item['Total Runoff CFS']
+            # out_item.runoff_coeff = swmm_result_item['Total Runoff Coeff']
+
+        self.printOut('After the get swmm values')
+
+        # output_list contains results from the UF side query, it has the ids and scag codes etc from the calculations
+        # needs to be joined with the results from the status endpoint call
         
 
 
@@ -605,7 +751,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
     def calculate_future_water(self):
 
-        # self.printOut('calculate_future_water() setting the result_dict to feature_dict')
+        self.printOut('calculate_future_water() setting the result_dict to feature_dict')
 
         self.result_dict.update({
             'total_swmm_runoff': 999999,
@@ -614,7 +760,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         self.result_dict.update(self.feature_dict)
 
     def calculate_base_water(self):
-        # self.printOut('calculate_base_water()')
+        self.printOut('calculate_base_water()')
 
         self.result_dict = defaultdict(lambda: float(0))
 
@@ -635,13 +781,22 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         pSql = '''
         create table {the_schema}.{result_table} ({fields});'''.format(fields=output_field_syntax, **options)
         execute_sql(pSql)
+        self.printOut('pSql')
+        self.printOut(pSql)
 
         output_textfile = StringIO("")
 
         # each row is a feature from the map what the calculation has been done for
         for row in output_list:
             stringrow = []
+            # self.printOut('row:')
+            # self.printOut(row)
             for item in row:
+                if(item == None):
+                    # self.printOut('item is None, setting to 0')
+                    item = 0
+                # self.printOut('item in row item:')
+                # self.printOut(item)
                 if isinstance(item, int):
                     stringrow.append(str(item))
                 else:
@@ -656,15 +811,17 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         pSql = '''alter table {the_schema}.{result_table} add column wkb_geometry geometry (GEOMETRY, 4326);
         '''.format(**options)
         execute_sql(pSql)
+        self.printOut('pSql')
+        self.printOut(pSql)
 
 
         self.printOut('updating the swmm table')
-        # self.printOut('the_schema')
-        # self.printOut(the_schema)
-        # self.printOut('result_table')
-        # self.printOut(result_table)
-        # self.printOut('base_schema')
-        # self.printOut(base_schema)
+        self.printOut('the_schema')
+        self.printOut(options['the_schema'])
+        self.printOut('result_table')
+        self.printOut(options['result_table'])
+        self.printOut('base_schema')
+        self.printOut(options['base_schema'])
 
 
 
@@ -686,6 +843,9 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         add_geom_idx(options['the_schema'], options['result_table'],  'wkb_geometry')
             #   footprint/main/utils/uf_toolbox.py:272
         add_primary_key(options['the_schema'], options['result_table'], 'id')
+        queryhere = '''create index {1}_{2}_idx on {0}.{1} ({2});'''.format(options['the_schema'], options['result_table'], 'total_swmm_runoff')
+        self.printOut('queryhere')
+        self.printOut(queryhere)
         add_attribute_idx(options['the_schema'], options['result_table'], 'total_swmm_runoff')
 
     def printOut(self, toPrint):
