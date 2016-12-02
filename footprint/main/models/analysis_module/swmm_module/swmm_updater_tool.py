@@ -188,7 +188,6 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         # #             where cast(a.id as int) = cast(b.id as int);
 
 
-
         for feature in annotated_features.iterator():
 
             self.feature = feature
@@ -221,6 +220,19 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         FeatureCollectionWrapper["crs"]["properties"]["name"] = "urn:ogc:def:crs:EPSG::4326"
         FeatureCollectionWrapper["type"] = "FeatureCollection"
         FeatureCollectionWrapper["features"] = geom_arr
+        FeatureCollectionWrapper["lid_flag"] = "0"
+
+        try:
+            sn = self.config_entity.scenario.name
+            sn = sn.lower()
+            if('lid' in sn):
+                if('moderate' in sn):
+                    FeatureCollectionWrapper["lid_flag"] = "1"
+                elif('aggressive' in sn):
+                    FeatureCollectionWrapper["lid_flag"] = "2"
+
+        except Exception as e:
+            pass
 
         return output_list, options, FeatureCollectionWrapper
 
