@@ -588,7 +588,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
         swmm_result_dict = {}
         # GET STATUS
-        wait_seconds = 800
+        wait_seconds = 1200
         n = 5
         # currently taking about 210 seconds
         while ( wait_seconds > 0 ):
