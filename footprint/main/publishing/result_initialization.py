@@ -82,6 +82,13 @@ class ResultKey(Keys):
 
     SWMM = Fab.ricate('swmm')
     SWMM_TOTAL = Fab.ricate('swmm_total')
+    # new totals for the swmm service go here
+    SWMM_PRECIP_IN = Fab.ricate('swmm_precip_in')
+    SWMM_EVAP_IN = Fab.ricate('swmm_evap_in')
+    SWMM_INFIL_IN = Fab.ricate('swmm_infil_in')
+    SWMM_RUNOFF_IN = Fab.ricate('swmm_runoff_in')
+    SWMM_RUNOFF_GAL = Fab.ricate('swmm_runoff_gal')
+    SWMM_PEAK_RUNOFF_CFS = Fab.ricate('swmm_peak_runoff_cfs')
 
     AGRICULTURE = Fab.ricate('agriculture')
     AGRICULTURE_ROI = Fab.ricate('agriculture_roi')
@@ -134,6 +141,14 @@ class ResultMediumKey(ResultKey):
     WATER_INDOOR_OUTDOOR = Fab.ricate('water_indoor_outdoor')
     WATER_COSTS_TOTAL = Fab.ricate('water')
     SWMM_TOTAL = Fab.ricate('swmm_total')
+    # new totals for the swmm service go here
+    SWMM_PRECIP_IN = Fab.ricate('swmm_precip_in')
+    SWMM_EVAP_IN = Fab.ricate('swmm_evap_in')
+    SWMM_INFIL_IN = Fab.ricate('swmm_infil_in')
+    SWMM_RUNOFF_IN = Fab.ricate('swmm_runoff_in')
+    SWMM_RUNOFF_GAL = Fab.ricate('swmm_runoff_gal')
+    SWMM_PEAK_RUNOFF_CFS = Fab.ricate('swmm_peak_runoff_cfs')
+
     ENERGY_TOTAL = Fab.ricate('energy_total')
     ENERGY_RES_USE = Fab.ricate('energy_res_use')
     ENERGY_COM_USE = Fab.ricate('energy_com_use')
