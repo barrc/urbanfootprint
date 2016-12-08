@@ -46,7 +46,7 @@ Footprint.SwmmModuleManagementView = SC.View.extend({
 
     moduleResultsView: SC.View.extend({
         classNames: "footprint-module-results-view".w(),
-        childViews: ['scenarioTitleView', 'totalSwmmResultView'],
+        childViews: ['scenarioTitleView'],
         layout: {top: 120},
 
         content: null,
@@ -59,13 +59,6 @@ Footprint.SwmmModuleManagementView = SC.View.extend({
             value: function() {
             return '%@:'.fmt(this.get('scenarioName'));
         }.property('scenarioName')
-        }),
-
-        totalSwmmResultView: Footprint.TopLabeledResultView.extend({
-            layout: {height: 40, top: 40, left: 10, right: 10},
-            resultBinding: SC.Binding.oneWay('.parentView*content.query.firstObject'),
-            columnName: 'total_swmm_runoff__sum',
-            title: 'Total SWMM Runoff'
-        }),
+        })
     })
 })
