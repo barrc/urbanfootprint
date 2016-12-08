@@ -333,6 +333,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             try:
                 responseObj = json.loads(r._content)
                 simulationID = responseObj['sim_id']
+                self.printOut('simulationID: ' + str(simulationID))
 
             except Exception as e:
                 self.printOut('no result_list attribute on repsonse')
