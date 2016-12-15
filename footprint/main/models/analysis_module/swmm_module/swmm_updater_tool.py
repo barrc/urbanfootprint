@@ -117,6 +117,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
     def swmm_construct_geo_json(self, annotated_features, options, kwargs):
         # self.printOut('swmm_construct_geo_json()')
+        idList = []
         for feature in annotated_features.iterator(): 
             idList.append(str(feature.id))
 
@@ -147,7 +148,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
 
         # self.printOut(' pSql returned retVals len')
-        numRecords = len(retVals) # 284
+        numRecords = len(retVals) # 300
         # self.printOut(numRecords)
         # geom_dict = {}
         geom_arr = []
