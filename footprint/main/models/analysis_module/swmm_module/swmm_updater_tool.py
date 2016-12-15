@@ -117,18 +117,10 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
     def swmm_construct_geo_json(self, annotated_features, options, kwargs):
         # self.printOut('swmm_construct_geo_json()')
-        idList = []
         for feature in annotated_features.iterator(): 
-            # self.printOut('feature.id')
-            # self.printOut(feature.id)
             idList.append(str(feature.id))
 
-        # self.printOut('idList')
-        # self.printOut(idList)
         joinedIdList = ",".join(idList)
-        # self.printOut('joinedIdList')
-        # self.printOut(joinedIdList)
-
         output_list = []
 
         approx_fifth = int(annotated_features.count() / 14 - 1) if annotated_features.count() > 30 else 1
@@ -255,12 +247,9 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         self.printOut('self.increment')
         self.printOut(self.increment)
 
-        features = self.end_state_class.objects.filter(Q(du__gt=0) | Q(emp__gt=0))
+        # features = self.end_state_class.objects.filter(Q(du__gt=0) | Q(emp__gt=0)) # prev filter was removing all the park parcels
+        features = self.end_state_class.objects.filter()
 
-
-        self.printOut('features')
-        self.printOut(features)
-        # annotated features is the list of the features from the map
         annotated_features = annotated_related_feature_class_pk_via_geographies(features, self.config_entity, [
             DbEntityKey.BASE_CANVAS, DbEntityKey.CLIMATE_ZONES])
 
@@ -278,7 +267,8 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
     def run_base_calculations(self,**kwargs):
 
         # TODO: should only need to be run once, so check if the values in the UF swmm table have been set
-        features = self.base_class.objects.filter(Q(du__gt=0) | Q(emp__gt=0))
+        # features = self.base_class.objects.filter(Q(du__gt=0) | Q(emp__gt=0)) # prev filter was removing all the park parcels
+        features = self.base_class.objects.filter()
 
         annotated_features = annotated_related_feature_class_pk_via_geographies(features, self.config_entity, [
             DbEntityKey.BASE_CANVAS, DbEntityKey.CLIMATE_ZONES])
