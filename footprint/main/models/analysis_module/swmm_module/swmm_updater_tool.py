@@ -318,7 +318,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             # test_file_geojson_str = open('/srv/calthorpe/urbanfootprint/footprint/main/models/analysis_module/swmm_module/ElkGrove3.geojson', 'r').read()
             geo_json_str_val = json.dumps(geo_json_str)
             
-            url = 'http://chis-dev.respec.com/rest/submit'
+            url = 'http://swmm.respec.com/rest/submit'
             r = requests.post(url, data={u"geojson_string": geo_json_str_val})
             # should return { "sim-id": "sim-swmm-3656125","success": true }  or { "success": false }
             try:
@@ -341,7 +341,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             time.sleep(n) # delays for n seconds
             wait_seconds -= n
             try:
-                url = 'http://chis-dev.respec.com/rest/status/' + simulationID
+                url = 'http://swmm.respec.com/rest/status/' + simulationID
                 # self.printOut(url)
                 r = requests.get(url)
                 try:
@@ -361,7 +361,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
         # RUN SIMULAION
         try:
-            url = 'http://chis-dev.respec.com/rest/run_sim/' + simulationID
+            url = 'http://swmm.respec.com/rest/run_sim/' + simulationID
             # self.printOut(url)
             r = requests.get(url)
 
@@ -382,7 +382,7 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             time.sleep(n) # delays for n seconds
             wait_seconds -= n
             try:
-                url = 'http://chis-dev.respec.com/rest/status/' + simulationID
+                url = 'http://swmm.respec.com/rest/status/' + simulationID
                 # self.printOut(url)
                 r = requests.get(url)
                 try:
