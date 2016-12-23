@@ -44,6 +44,8 @@ logger = logging.getLogger(__name__)
 class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
     objects = GeoInheritanceManager()
 
+    swmm_domain = 'http://swmm.respec.com'
+
     NLCD_type_list = []
     typeToAdd = {}
     typeToAdd['nlcd_code'] = 24
@@ -317,8 +319,8 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
         try:
             # test_file_geojson_str = open('/srv/calthorpe/urbanfootprint/footprint/main/models/analysis_module/swmm_module/ElkGrove3.geojson', 'r').read()
             geo_json_str_val = json.dumps(geo_json_str)
-            
-            url = 'http://swmm.respec.com/rest/submit'
+            url = self.swmm_domain + '/rest/submit'
+            self.printOut(url)
             r = requests.post(url, data={u"geojson_string": geo_json_str_val})
             # should return { "sim-id": "sim-swmm-3656125","success": true }  or { "success": false }
             try:
@@ -333,7 +335,9 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             self.printOut("error " + str(e))
             
         # GET STATUS
-        wait_seconds = 240
+        url = self.swmm_domain + '/rest/status/' + simulationID
+        self.printOut(url)
+        wait_seconds = 260
         n = 5
         while ( wait_seconds > 0 ):
             self.printOut('will wait a maximum of ' + str(wait_seconds) + ' more seconds')
@@ -341,8 +345,6 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             time.sleep(n) # delays for n seconds
             wait_seconds -= n
             try:
-                url = 'http://swmm.respec.com/rest/status/' + simulationID
-                # self.printOut(url)
                 r = requests.get(url)
                 try:
                     responseObj = json.loads(r._content)
@@ -360,9 +362,9 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
                 self.printOut("error " + str(e))
 
         # RUN SIMULAION
+        url = self.swmm_domain + '/rest/run_sim/' + simulationID
+        self.printOut(url)
         try:
-            url = 'http://swmm.respec.com/rest/run_sim/' + simulationID
-            # self.printOut(url)
             r = requests.get(url)
 
         except Exception as e:
@@ -373,6 +375,8 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
 
         swmm_result_dict = {}
         # GET STATUS
+        url = self.swmm_domain + '/rest/status/' + simulationID
+        self.printOut(url)
         wait_seconds = 1200
         n = 5
         # currently taking about 210 seconds
@@ -382,8 +386,6 @@ class SwmmUpdaterTool(AnalysisTool, BuildingPerformance):
             time.sleep(n) # delays for n seconds
             wait_seconds -= n
             try:
-                url = 'http://swmm.respec.com/rest/status/' + simulationID
-                # self.printOut(url)
                 r = requests.get(url)
                 try:
                     responseObj = json.loads(r._content)
